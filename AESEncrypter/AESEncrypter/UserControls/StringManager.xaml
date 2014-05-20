@@ -1,0 +1,31 @@
+﻿<UserControl x:Class="AESEncrypter.UserControls.StringManager"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="350" d:DesignWidth="525" Background="CornflowerBlue">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0.1*"/>
+            <RowDefinition Height="0.12*"/>
+            <RowDefinition Height="0.78*"/>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" Text="Inserisci la chiave" Margin="10,10,10,5"/>
+        <PasswordBox x:Name="PasswordBox" Grid.Row="1" Margin="10,0,10,10" PasswordChanged="PasswordBox_PasswordChanged" />
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="0.13*" />
+                <RowDefinition Height="0.87*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Row="0" Grid.Column="0" Margin="10" Text="Testo in chiaro" />
+            <TextBlock Grid.Row="0" Grid.Column="1" Margin="10" Text="Testo cifrato" />
+            <TextBox Grid.Row="1" Grid.Column="0" Margin="10,0,5,10" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" x:Name="PlainText" Text="{Binding Path=Content, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextChanged="PlainText_TextChanged" />
+            <TextBox Grid.Row="1" Grid.Column="1" Margin="5,0,10,10" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" x:Name="CipherText" Text="{Binding Path=Content, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextChanged="CipherText_TextChanged" />
+        </Grid>
+    </Grid>
+</UserControl>

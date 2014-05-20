@@ -1,0 +1,38 @@
+﻿<Window x:Class="AESEncrypter.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:UserControls="clr-namespace:AESEncrypter.UserControls"
+        Title="AESCypher" Height="390" Width="535" ResizeMode="NoResize" WindowStyle="SingleBorderWindow" Background="Gainsboro">
+    <Grid>
+        <!--<UserControls:FileManager />-->
+        <TabControl>
+            <TabItem Header="Gestisci Files" TabIndex="0" >
+                <UserControls:FileManager x:Name="FileManager" />
+            </TabItem>
+            <TabItem Header="CifraStringhe" TabIndex="1">
+                <UserControls:StringManager />
+            </TabItem>
+        </TabControl>
+        <!--<Grid.ColumnDefinitions>
+            <ColumnDefinition Width="89*"/>
+            <ColumnDefinition Width="430*"/>
+        </Grid.ColumnDefinitions>
+        <Grid Name="MainGrid" Grid.ColumnSpan="2">
+            <TextBlock Margin="10,10,176,287" Text="Scegli il file da elaborare."/>
+            <TextBox Name="SourcePath" Text="{Binding Content}" IsReadOnly="True" Margin="10,35,111,255"/>
+            <Button Margin="413,35,10,255" Name="ChangeSource" Content="Cambia" Click="ChangeSource_Click"/>
+            <TextBlock Margin="10,72,1,222" Text="Scegli il file di destinazione (Solo se si cripta e si vuole un nome non randomico)"/>
+            <TextBox Name="DestinationName" Text="" Margin="10,100,10,190"/>
+            <TextBlock Margin="10,137,1,157" Text="Inserisci la chiave"/>
+            <PasswordBox Margin="10,165,10,121" x:Name="PasswordField" />
+            <Button Margin="10,215,258,58" Name="EncryptButton" Content="Cifra!" Click="EncryptButton_Click"/>
+            <Button Margin="266,215,10,58" x:Name="DecryptButton" Content="Decifra!" Click="DecryptButton_Click"/>
+        </Grid>
+        <StatusBar Margin="0,280,0,0" Grid.ColumnSpan="2">
+            <StatusBarItem/>
+            <StatusBarItem>
+                <ProgressBar Value="{Binding Content}" Visibility="Visible" Height="25" Name="Progress" Minimum="1" Width="490"/>
+            </StatusBarItem>
+        </StatusBar>-->
+    </Grid>
+</Window>
