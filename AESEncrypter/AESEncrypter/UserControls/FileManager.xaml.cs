@@ -26,11 +26,13 @@ namespace AESEncrypter.UserControls
     {
         AesFileWorker worker = new AesFileWorker();
         NotifyInt progress = new NotifyInt();
+        NotifyBool new_version = new NotifyBool(true);
         string DocumentsFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         public FileManager()
         {
             InitializeComponent();
             SourcePath.DataContext = new NotifyString();
+            EncriptionVersion.DataContext = new_version;
             Progress.DataContext = progress;
             worker.Finished += worker_Finished;
             Status.Visibility = System.Windows.Visibility.Hidden;
@@ -38,7 +40,8 @@ namespace AESEncrypter.UserControls
 
         void worker_Finished(object sender, string e)
         {
-            MessageBox.Show(e);
+            var window = Window.GetWindow(this);
+            MessageBox.Show(window, e);
             Unlock();
         }
 
@@ -61,23 +64,22 @@ namespace AESEncrypter.UserControls
 
         private string ChooseFolder(string old_path)
         {
-            using (System.Windows.Forms.OpenFileDialog dlg = new System.Windows.Forms.OpenFileDialog())
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+            if (old_path == null)
+                dlg.InitialDirectory = DocumentsFolder;
+            else if (File.Exists(old_path) || Directory.Exists(old_path))
+                dlg.InitialDirectory = new FileInfo(old_path).DirectoryName;
+            else
+                dlg.InitialDirectory = DocumentsFolder;
+            dlg.Multiselect = false;
+            dlg.Filter = "All Files (*.*)|*.*|Encrypted Files (.enc)|*.enc";
+            dlg.FilterIndex = 1;
+            var result = dlg.ShowDialog();
+            if (result.HasValue && result.Value)
             {
-                if (old_path == null)
-                    dlg.InitialDirectory = DocumentsFolder;
-                else if (File.Exists(old_path) || Directory.Exists(old_path))
-                    dlg.InitialDirectory = new FileInfo(old_path).DirectoryName;
-                else
-                    dlg.InitialDirectory = DocumentsFolder;
-                dlg.Multiselect = false;
-                dlg.Filter = "All Files (*.*)|*.*|Encrypted Files (.enc)|*.enc";
-                dlg.FilterIndex = 1;
-                System.Windows.Forms.DialogResult result = dlg.ShowDialog();
-                if (result == System.Windows.Forms.DialogResult.OK)
-                {
-                    return dlg.FileName;
-                }
+                return dlg.FileName;
             }
+
             return old_path;
         }
 
@@ -91,12 +93,43 @@ namespace AESEncrypter.UserControls
 
         private void EncryptButton_Click(object sender, RoutedEventArgs e)
         {
+            var window = Window.GetWindow(this);
+            if (PasswordField.Password.Length < 1)
+            {
+                MessageBox.Show(window, "Inserire una password");
+                return;
+            }
+            if (PasswordField.Password.Length < 8)
+            {
+                var pwd_check = MessageBox.Show(window, "La password ha lunghezza inferiore di 8 caratteri...\nE' caldamente consigliato di usare una password di almeno 8 caratteri.\nContinuare?", "Password corta", MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.OK);
+                if (pwd_check != MessageBoxResult.OK)
+                    return;
+            }
+            // Instantiate the dialog box
+            DialogBox.ConfirmPasswordDialog dlg = new DialogBox.ConfirmPasswordDialog();
+            // Configure the dialog box
+            dlg.Owner = Window.GetWindow(this);
+            // Open the dialog box modally 
+            var res = dlg.ShowDialog();
+
+            if (!dlg.Result.HasValue || !dlg.Result.Value)
+            {
+                return;
+            }
+
+            if (PasswordField.Password != dlg.PasswordField.Password)
+            {
+                MessageBox.Show(window, "Le password non coincidono");
+                return;
+            }
+
             var in_path = (SourcePath.DataContext as NotifyString).Content;
             var out_path = DestinationName.Text != "" ? DestinationName.Text : null;
             try
             {
                 Lock();
-                worker.StartAsyncEncrypt(progress, PasswordField.Password, in_path, out_path);
+                worker.StartAsyncEncrypt(progress, new_version.Content, PasswordField.Password, in_path, out_path);
+                
                 //using (var myAes = new AESCrypter())
                 //{
                     
@@ -106,17 +139,47 @@ namespace AESEncrypter.UserControls
             }
             catch (Exception exc)
             {
-                MessageBox.Show("errore nella cifratura\n" + exc.Message);
+                MessageBox.Show(window, "errore nella cifratura\n" + exc.Message);
             }
         }
 
         private void DecryptButton_Click(object sender, RoutedEventArgs e)
         {
+            var window = Window.GetWindow(this);
+            if (PasswordField.Password.Length < 1)
+            {
+                MessageBox.Show(window, "Inserire una password");
+                return;
+            }
+            //if (PasswordField.Password.Length < 8)
+            //{
+            //    var pwd_check = MessageBox.Show("La password ha lunghezza inferiore di 8 caratteri...\nE' caldamente consigliato di usare una password di almeno 8 caratteri.\nContinuare?", "Password corta", MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.OK);
+            //    if (pwd_check != MessageBoxResult.OK)
+            //        return;
+            //}
+            //// Instantiate the dialog box
+            //DialogBox.ConfirmPasswordDialog dlg = new DialogBox.ConfirmPasswordDialog();
+            //// Configure the dialog box
+            //dlg.Owner = Window.GetWindow(this);
+            //// Open the dialog box modally 
+            //var res = dlg.ShowDialog();
+
+            //if (!dlg.Result.HasValue || !dlg.Result.Value)
+            //{
+            //    return;
+            //}
+
+            //if (PasswordField.Password != dlg.PasswordField.Password)
+            //{
+            //    MessageBox.Show("Le password non coincidono");
+            //    return;
+            //}
+
             var in_path = (SourcePath.DataContext as NotifyString).Content;
             try
             {
                 Lock();
-                worker.StartAsyncDecrypt(progress, PasswordField.Password, in_path);
+                worker.StartAsyncDecrypt(progress, new_version.Content, PasswordField.Password, in_path);
                 //using (var myAes = new AESCrypter())
                 //{
                 //    //result = myAes.DecryptPath(PasswordField.Password, in_path);
@@ -125,7 +188,7 @@ namespace AESEncrypter.UserControls
             }
             catch (Exception exc)
             {
-                MessageBox.Show("errore nella cifratura\n" + exc.Message);
+                MessageBox.Show(window, "errore nella cifratura\n" + exc.Message);
             }
         }
 

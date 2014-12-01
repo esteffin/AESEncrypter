@@ -11,10 +11,33 @@ namespace AESEncrypter.Components
 {
     class AesFileWorker : IDisposable
     {
+        enum Version
+        {
+            Version1,
+            Version2
+        }
+
+        private class Arg : IDisposable
+        {
+            public string key;
+            public bool encrypt;
+            public Version version;
+
+            public Arg(string key, bool encrypt, Version version)
+            {
+                this.key = key;
+                this.encrypt = encrypt;
+                this.version = version;
+            }
+
+            public void Dispose()
+            {
+                this.key = null;
+            }
+        }
 
         public BackgroundWorker bw = new BackgroundWorker();
         private NotifyInt DataContext;
-        private string key;
         private string in_path;
         private string out_path;
 
@@ -41,17 +64,17 @@ namespace AESEncrypter.Components
             }
         }
 
-        public void StartAsyncEncrypt(NotifyInt binding, string key, string in_path, string out_path = null)
+        public void StartAsyncEncrypt(NotifyInt binding, bool new_version, string key, string in_path, string out_path = null)
         {
-            Initialize(binding, key, in_path);
+            Initialize(binding, in_path);
             this.out_path = out_path;
-            bw.RunWorkerAsync(true);
+            bw.RunWorkerAsync(new Arg(key, true, new_version ? Version.Version2 : Version.Version1));
         }
 
-        public void StartAsyncDecrypt(NotifyInt binding, string key, string in_path)
+        public void StartAsyncDecrypt(NotifyInt binding, bool new_version, string key, string in_path)
         {
-            Initialize(binding, key, in_path);
-            bw.RunWorkerAsync(false);
+            Initialize(binding, in_path);
+            bw.RunWorkerAsync(new Arg(key, false, new_version ? Version.Version2 : Version.Version1));
         }
 
         public void Abort()
@@ -59,9 +82,8 @@ namespace AESEncrypter.Components
             bw.CancelAsync();
         }
 
-        private void Initialize(NotifyInt binding, string key, string in_path)
+        private void Initialize(NotifyInt binding, string in_path)
         {
-            this.key = key;
             this.in_path = in_path;
             DataContext = binding;
             bw.WorkerReportsProgress = true;
@@ -84,26 +106,53 @@ namespace AESEncrypter.Components
 
         private void bw_DoWork(object sender, DoWorkEventArgs e)
         {
-            using (var aes = new AESCrypter())
+            using (var arg = (Arg)e.Argument)
             {
-
-                if ((bool)e.Argument)
+                if (arg.version == Version.Version1 && arg.encrypt)
                 {
-                    e.Result = aes.EncryptPath(key, in_path, bw, out_path);
+                    using (var aes = new AESCrypter())
+                    {
+                        e.Result = aes.EncryptPath(arg.key, in_path, bw, out_path);
+                    }
+                }
+                else if (arg.version == Version.Version2 && arg.encrypt)
+                {
+                    using (var aes_v2 = new AESCrypterV2())
+                    {
+                        e.Result = aes_v2.EncryptPath(arg.key, in_path, bw, out_path);
+                    }
                 }
                 else
                 {
-                    e.Result = aes.DecryptPath(key, in_path, bw);
+                    
+                    using (var aes = new AESCrypter())
+                    {
+                        e.Result = aes.DecryptPath(arg.key, in_path, bw);
+                    }
+                    if (((string)e.Result).StartsWith("Errore"))
+                    {
+                        Console.WriteLine("Exception with version 1...\nTrying with version 2...");
+                        try
+                        {
+                            using (var aes_v2 = new AESCrypterV2())
+                            {
+                                e.Result = aes_v2.DecryptPath(arg.key, in_path, bw);
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            throw;
+                        }
+                    }
                 }
             }
         }
-        
+
         public void Dispose()
         {
             bw.Dispose();
             bw = new BackgroundWorker();
             DataContext = null;
-            key = null;
             in_path = null;
             out_path = null;
         }

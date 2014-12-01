@@ -31,7 +31,16 @@
             </Grid>
             <TextBlock Grid.Row="2" Margin="10" Text="Scegli il file di destinazione (Solo se si cripta e si vuole un nome non randomico)"/>
             <TextBox Grid.Row="3" Name="DestinationName" Text="" Margin="10,0,10,10"/>
-            <TextBlock Grid.Row="4" Margin="10" Text="Inserisci la chiave"/>
+            <Grid Grid.Row="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Margin="10" Text="Inserisci la chiave"/>
+                <CheckBox Name="EncriptionVersion" Grid.Column="1" IsChecked="{Binding Content}" FlowDirection="RightToLeft" Margin="10">
+                    <TextBlock FlowDirection="LeftToRight" Text="Encription V2:" />
+                </CheckBox>
+            </Grid>
             <PasswordBox Grid.Row="5" Margin="10,0,10,10" x:Name="PasswordField" />
             <Grid Grid.Row="6">
                 <Grid.ColumnDefinitions>
