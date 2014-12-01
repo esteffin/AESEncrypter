@@ -131,7 +131,7 @@ namespace AESEncrypter.Components
                     }
                     if (((string)e.Result).StartsWith("Errore"))
                     {
-                        Console.WriteLine("Exception with version 1...\nTrying with version 2...");
+                        //Console.WriteLine("Exception with version 1...\nTrying with version 2...");
                         try
                         {
                             using (var aes_v2 = new AESCrypterV2())

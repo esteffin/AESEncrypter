@@ -91,7 +91,7 @@ namespace AESCore
 
         public void Dispose()
         {
-            Console.WriteLine("Disposed"); ;
+            //Console.WriteLine("Disposed"); ;
         }
 
         public string EncryptPath(string key, string in_path, BackgroundWorker worker, string optional_out_path = null)

@@ -26,7 +26,7 @@ namespace AESEncrypter.UserControls
     {
         AesFileWorker worker = new AesFileWorker();
         NotifyInt progress = new NotifyInt();
-        NotifyBool new_version = new NotifyBool(true);
+        NotifyBool new_version = new NotifyBool(false);
         string DocumentsFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         public FileManager()
         {
